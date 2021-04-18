@@ -16,8 +16,8 @@
         "base",
     ],
     "data": [
-        "views/fleet_vehicle_views.xml",
         "security/ir.model.access.csv",
+        "views/fleet_vehicle_views.xml",
         "views/tracker_device_views.xml",
         "views/phone_line_views.xml",
     ],
