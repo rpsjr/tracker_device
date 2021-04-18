@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright <2021> <Raimundo Pereira da Silva Junior <raimundopsjr@gmail.com>
+     License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl). -->
+
+<odoo>
+
+    <!-- form view -->
+      <record model="ir.ui.view" id="tracker_device_form_view">
+          <field name="name">tracker.device.form</field>
+          <field name="model">tracker.device</field>
+          <field name="arch" type="xml">
+              <form string="Tracker Device">
+                    <sheet>
+                        <field name="name" invisible="1"/>
+                        <group col="2">
+                            <group string="Tracker Unit">
+                                <field name="model" />
+                                <field name="imei"/>
+                                <field name="unit_pass"/>
+                                <field name="admin_lines"/>
+                            </group>
+                            <group string="Associated Assets">
+                                <field name="m2m_network_id"/>
+                                <field name="vehicle"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+          </field>
+      </record>
+
+
+</odoo>

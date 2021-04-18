@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright <2021> <Raimundo Pereira da Silva Junior <raimundopsjr@gmail.com>
+     License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl). -->
+
+<odoo>
+
+    <!-- form view -->
+      <record model="ir.ui.view" id="phone_line_form_view">
+          <field name="name">phone.line.form</field>
+          <field name="model">phone.line</field>
+          <field name="arch" type="xml">
+              <form string="Phone Line">
+                    <sheet>
+                        <field name="name" invisible="1"/>
+                        <group col="2">
+                            <group string="">
+                                <field name="tel_operator" />
+                                <field name="phone_nr" widget="phone"/>
+                                <field name="tel_operator_pass"/>
+                            </group>
+                            <group string="">
+                                <field name="l10n_br_cnpj_cpf"/>
+                                <field name="tracker_device"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+          </field>
+      </record>
+
+
+</odoo>
