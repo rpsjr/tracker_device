@@ -2,7 +2,7 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 {
-    "name": "GPS Track Device",
+    "name": "GPS Tracker Device",
     "summary": """
         This is a bridge module ....""",
     "version": "13.0.1.0.0",
@@ -16,10 +16,10 @@
         "base",
     ],
     "data": [
-        "security/ir.model.access.csv",
         "views/fleet_vehicle_views.xml",
         "views/tracker_device_views.xml",
         "views/phone_line_views.xml",
+        "security/ir.model.access.csv",
     ],
     "demo": [],
 }
