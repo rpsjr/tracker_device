@@ -33,7 +33,6 @@ class TrackerDevice(models.Model):
         for record in self:
             record.name = (record.m2m_network_id.name or '') + '/' + (record.model or '')
 
-
 class FleetVehicle(models.Model):
     _inherit = 'fleet.vehicle'
     tracker_device = fields.Many2one('tracker.device',
