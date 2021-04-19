@@ -3,7 +3,7 @@
      License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl). -->
 
 <odoo>
-
+  <data>
     <!-- form view -->
       <record model="ir.ui.view" id="phone_line_form_view">
           <field name="name">phone.line.form</field>
@@ -16,11 +16,14 @@
                             <group string="">
                                 <field name="tel_operator" />
                                 <field name="phone_nr" widget="phone"/>
+                                <field name="tel_operator_user"/>
+                                <field name="tel_operator_plan"/>
                                 <field name="tel_operator_pass"/>
                             </group>
                             <group string="">
                                 <field name="l10n_br_cnpj_cpf"/>
-                                <field name="tracker_device"/>
+                                <field name="holder"/>
+                                <field name="tracker_device_id"/>
                             </group>
                         </group>
                     </sheet>
@@ -28,5 +31,43 @@
           </field>
       </record>
 
+      <record id="phone_line_view_tree" model="ir.ui.view">
+          <field name="name">phone.line.view.tree</field>
+          <field name="model">phone.line</field>
+          <field name="arch" type="xml">
+              <tree string="Units">
+                <field name="tel_operator" />
+                <field name="phone_nr" widget="phone"/>
+                <field name="tel_operator_user"/>
+                <field name="tel_operator_plan"/>
+                <field name="tel_operator_pass"/>
+                <field name="l10n_br_cnpj_cpf"/>
+                <field name="holder"/>
+                <field name="tracker_device_id"/>
+              </tree>
+          </field>
+      </record>
+
+      <record id="phone_line_action" model="ir.actions.act_window">
+          <field name="name">Phone lines</field>
+          <field name="res_model">phone.line</field>
+          <field name="view_mode">tree,form</field>
+          <field name="view_id" ref="phone_line_view_tree"/>
+          <field name="help" type="html">
+              <p class="o_view_nocontent_smiling_face">
+                  Create a phone line
+              </p><p>
+                  Phone lines are used to control privide network to GPS track units.
+              </p>
+          </field>
+      </record>
+
+      <!-- MENUS -->
+      <menuitem id="phone_line_menu_main"
+          name="Phone lines"
+          parent="fleet.fleet_configuration"
+          action="phone_line_action"
+          groups="fleet.fleet_group_user"/>
+  </data>
 
 </odoo>

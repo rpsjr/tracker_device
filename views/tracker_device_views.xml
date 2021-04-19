@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Copyright <2021> <Raimundo Pereira da Silva Junior <raimundopsjr@gmail.com>
      License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl). -->
-
 <odoo>
+  <data>
 
     <!-- form view -->
       <record model="ir.ui.view" id="tracker_device_form_view">
@@ -21,7 +21,7 @@
                             </group>
                             <group string="Associated Assets">
                                 <field name="m2m_network_id"/>
-                                <field name="vehicle"/>
+                                <field name="vehicle_id"/>
                             </group>
                         </group>
                     </sheet>
@@ -29,5 +29,40 @@
           </field>
       </record>
 
+      <record id="tracker_device_view_tree" model="ir.ui.view">
+          <field name="name">tracker.device.view.tree</field>
+          <field name="model">tracker.device</field>
+          <field name="arch" type="xml">
+              <tree string="Units">
+                <field name="model" />
+                <field name="imei"/>
+                <field name="unit_pass"/>
+                <field name="admin_lines"/>
+                <field name="m2m_network_id"/>
+                <field name="vehicle_id"/>
+              </tree>
+          </field>
+      </record>
 
+      <record id="tracker_device_action" model="ir.actions.act_window">
+          <field name="name">GPS trackers</field>
+          <field name="res_model">tracker.device</field>
+          <field name="view_mode">tree,form</field>
+          <field name="view_id" ref="tracker_device_view_tree"/>
+          <field name="help" type="html">
+              <p class="o_view_nocontent_smiling_face">
+                  Create a GPS tracker
+              </p><p>
+                  Trackers are used to control assests.
+              </p>
+          </field>
+      </record>
+
+      <!-- MENUS -->
+      <menuitem id="tracker_device_menu_main"
+          name="GPS Tracker"
+          parent="fleet.fleet_configuration"
+          action="tracker_device_action"
+          groups="fleet.fleet_group_user"/>
+  </data>
 </odoo>
