@@ -1,4 +1,4 @@
 id,name,model_id/id,group_id/id,perm_read,perm_write,perm_create,perm_unlink
-access_tracker_device_admin,access_tracker_device_admin,tracker.device_model_tracker_device,fleet.fleet_group_manager,1,1,1,1
-access_phone_line_admin,access_phone_line_admin,tracker.device_model_phone_line,fleet.fleet_group_manager,1,1,1,1
+access_tracker_device_admin,access_tracker_device_admin,model_tracker_device,fleet.fleet_group_manager,1,1,1,1
+access_phone_line_admin,access_phone_line_admin,model_phone_line,fleet.fleet_group_manager,1,1,1,1
 ,,,,,,,
