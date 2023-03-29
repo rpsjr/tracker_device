@@ -20,6 +20,9 @@ class PhoneLine(models.Model):
     tracker_device_id = fields.Many2one('tracker.device',
                                  string='Tracker Device',
                                  help="Tracker Device using the phone line.")
+    #tracker_device_id2 = fields.Selection(
+    #    related="tracker.device'", help="Tracker Device using the phone line.", store=True
+    #)
 
     @api.depends('tel_operator', 'phone_nr')
     def _compute_phone_line_name(self):

@@ -18,10 +18,12 @@
                                 <field name="imei"/>
                                 <field name="unit_pass"/>
                                 <field name="admin_lines"/>
+                                <field name="engine_last_cmd"/>
                             </group>
                             <group string="Associated Assets">
                                 <field name="m2m_network_id"/>
                                 <field name="vehicle_id"/>
+                                <field name="vehicle_ids"/>
                             </group>
                         </group>
                     </sheet>
@@ -40,6 +42,7 @@
                 <field name="admin_lines"/>
                 <field name="m2m_network_id"/>
                 <field name="vehicle_id"/>
+                <field name="vehicle_ids"/>
               </tree>
           </field>
       </record>

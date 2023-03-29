@@ -5,7 +5,7 @@
     "name": "GPS Tracker Device",
     "summary": """
         This is a bridge module ....""",
-    "version": "13.0.1.0.0",
+    "version": "13.0.1.0.3",
     "category": "Human Resources/Fleet",
     "license": "AGPL-3",
     "author": "RPSJR",

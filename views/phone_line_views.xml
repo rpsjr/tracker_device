@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Copyright <2021> <Raimundo Pereira da Silva Junior <raimundopsjr@gmail.com>
      License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl). -->
-
 <odoo>
   <data>
     <!-- form view -->
-      <record model="ir.ui.view" id="phone_line_form_view">
+      <record id="phone_line_form_view" model="ir.ui.view" >
           <field name="name">phone.line.form</field>
           <field name="model">phone.line</field>
           <field name="arch" type="xml">
