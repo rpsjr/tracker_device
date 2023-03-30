@@ -18,6 +18,12 @@
                                 <field name="imei"/>
                                 <field name="unit_pass"/>
                                 <field name="admin_lines"/>
+                                <button name="resume_engine" string="Resume Engine"
+                                        type="object" 
+                                        attrs="{'invisible': [('engine_last_cmd', '=', 'unblocked')]}"/>
+                                <button name="stop_engine" string="Stop Egine"
+                                        type="object" 
+                                        attrs="{'invisible': [('engine_last_cmd', '=', 'blocked')]}"/>
                                 <field name="engine_last_cmd"/>
                             </group>
                             <group string="Associated Assets">
