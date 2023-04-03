@@ -32,7 +32,7 @@ class FleetVehicle(models.Model):
             tracker_device = vehicle.tracker_device
 
             # Call the traccar_api method to get the latest position of the device
-            response = tracker_device.traccar_api('positions', payload={'limit': 1})
+            response = tracker_device._traccar_api('positions', payload={'limit': 1})
 
             #_logger.info(f"################ response {response}")
 
