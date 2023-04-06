@@ -77,13 +77,21 @@ class TrackerDevice(models.Model):
         The resume_engine method is responsible for sending the command to resume the 
         engine of a device. 
         """
-
-        payload = {'type': 'engineResume', 'deviceId': self._fetch_traccar_deviceId}
+        
+        payload = {'type': 'engineResume', 'deviceId': self._fetch_traccar_deviceId()}
+        _logger.info(f"################ send_traccar_api_command payload {payload}")
         response = self._traccar_api('commands/send', 'POST', payload)
         if response:
             self.write({'engine_last_cmd': 'unblocked'})
             _logger.info(f"################ send_traccar_api_command response {response}")
             return response
+
+    def toggle_engine_status(self, only_stopped=True):
+        """This method is responsible for toggling the engine status of a device between blocked and unblocked"""
+        if self.engine_last_cmd == 'unblocked':
+            self.stop_engine(only_stopped)
+        else:
+            self.resume_engine(only_stopped)
 
     def _traccar_api(self, api_endpoint, request_type='GET', payload=None):
         """
@@ -104,7 +112,8 @@ class TrackerDevice(models.Model):
 
         headers = {
         'Authorization': api_key,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
         }
 
         if not payload:
@@ -112,7 +121,7 @@ class TrackerDevice(models.Model):
         payload['uniqueId'] = self.imei
 
         url = f'{api_url}/api/{api_endpoint}'
-
+        _logger.info(f"################ send_traccar_api_command url {url}")
         if request_type == 'GET':
             response = requests.get(url, headers=headers, params=payload)
         elif request_type == 'POST':

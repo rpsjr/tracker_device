@@ -1,4 +1,4 @@
-# Copyright 2021 - TODAY, RPSJR
+# Copyright 2021 - TODAY, RPSJR raimundops.jr@gmail.com
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 {
@@ -10,7 +10,7 @@
     "license": "AGPL-3",
     "author": "RPSJR",
     "maintainers": ["rpsjr"],
-    "website": "https://github.com/",
+    "website": "https://github.com/rpsjr/tracker_device",
     "depends": [
         "fleet",
         "base",

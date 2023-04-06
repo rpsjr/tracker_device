@@ -10,6 +10,20 @@
           <field name="model">tracker.device</field>
           <field name="arch" type="xml">
               <form string="Tracker Device">
+
+                    <div name="button_box" position="inside">
+                        <button class="oe_stat_button" type="object" name="toggle_engine_status" string='Resume Engine'
+                            icon="fa-play-circle" attrs="{'invisible': [('engine_last_cmd', '=', 'unblocked')]}"
+                            >
+
+                        </button>
+                        <button class="oe_stat_button" type="object" name="toggle_engine_status" string='Stop Engine'
+                            icon="fa-stop" attrs="{'invisible': [('engine_last_cmd', '=', 'blocked')]}"
+                            >
+
+                        </button>
+                    </div>
+
                     <sheet>
                         <field name="name" invisible="1"/>
                         <group col="2">
@@ -18,12 +32,6 @@
                                 <field name="imei"/>
                                 <field name="unit_pass"/>
                                 <field name="admin_lines"/>
-                                <button name="resume_engine" string="Resume Engine"
-                                        type="object" 
-                                        attrs="{'invisible': [('engine_last_cmd', '=', 'unblocked')]}"/>
-                                <button name="stop_engine" string="Stop Egine"
-                                        type="object" 
-                                        attrs="{'invisible': [('engine_last_cmd', '=', 'blocked')]}"/>
                                 <field name="engine_last_cmd"/>
                             </group>
                             <group string="Associated Assets">
