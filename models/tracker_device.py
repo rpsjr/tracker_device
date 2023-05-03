@@ -15,7 +15,8 @@ class TrackerDevice(models.Model):
     _name = 'tracker.device'
     _description = 'Tracker Device Management'
 
-    name = fields.Char(compute="_compute_tracker_device_name", store=True)
+    name = fields.Char(compute="_compute_tracker_device_name", 
+                       store=True)
     maker = fields.Char('Unit Maker')
     model = fields.Char('Unit Model')
     imei = fields.Char('Unit IMEI')
@@ -24,9 +25,15 @@ class TrackerDevice(models.Model):
                                  string='m2m Line Number',
                                  help="m2m network line number running the tracker.")
     admin_lines = fields.Char('Unit admin lines')
-    engine_last_cmd = fields.Selection([('blocked', 'Engine cut'), ('unblocked', 'Engine Resume')], 'Engine last command', help='Engine last command sent by odoo')
-    vehicle_id = fields.Many2one('fleet.vehicle', compute='_compute_vehicle_id', inverse='_vehicle_id_inverse')
-    vehicle_ids = fields.One2many('fleet.vehicle', 'tracker_device', string='vehicle_ids', ondelete='cascade')
+    engine_last_cmd = fields.Selection([('blocked', 'Engine cut'), ('unblocked', 'Engine Resume')], 
+                                       'Engine last command', 
+                                       help='Engine last command sent by odoo')
+    vehicle_id = fields.Many2one('fleet.vehicle', 
+                                 compute='_compute_vehicle_id', 
+                                 inverse='_vehicle_id_inverse')
+    vehicle_ids = fields.One2many('fleet.vehicle', 'tracker_device', 
+                                  string='vehicle_ids', 
+                                  ondelete='cascade')
     traccar_deviceId = fields.Char('Traccar deviceId')
 
     _sql_constraints = [
@@ -142,12 +149,28 @@ class TrackerDevice(models.Model):
     def _compute_vehicle_id(self):
         
         for tracker in self:
-            _logger.info(len(tracker.vehicle_ids))
+
+            _logger.info(f'tracker f1: {tracker}')
+            _logger.info(f'tracker.name f1: {tracker.name}')
+
             if len(tracker.vehicle_ids) > 0:
+
+                _logger.info(f'tracker.vehicle_ids: {tracker.vehicle_ids}')
+
+                for debveic in tracker.vehicle_ids:
+                        _logger.info(f'debveic: {debveic.name}')
+
                 tracker.vehicle_id = tracker.vehicle_ids[-1]
+
+            elif len(tracker.vehicle_ids) == 0:
+                tracker.vehicle_id = None
 
     def _vehicle_id_inverse(self):
         for tracker in self:
+
+            _logger.info(f'tracker f2: {tracker}')
+            _logger.info(f'tracker.name f2: {tracker.name}')
+
             if len(tracker.vehicle_ids) > 0:
                 # delete previous reference
                 for veic in tracker.vehicle_ids:

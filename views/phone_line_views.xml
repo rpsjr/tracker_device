@@ -15,6 +15,7 @@
                             <group string="">
                                 <field name="tel_operator" />
                                 <field name="phone_nr" widget="phone"/>
+                                <field name="sim_card_serial"/>
                                 <field name="tel_operator_user"/>
                                 <field name="tel_operator_plan"/>
                                 <field name="tel_operator_pass"/>
@@ -22,7 +23,7 @@
                             <group string="">
                                 <field name="l10n_br_cnpj_cpf"/>
                                 <field name="holder"/>
-                                <field name="tracker_device_id"/>
+                                <field name="tracker_device_id" widget="many2one"/> 
                             </group>
                         </group>
                     </sheet>

@@ -33,10 +33,11 @@
                                 <field name="unit_pass"/>
                                 <field name="admin_lines"/>
                                 <field name="engine_last_cmd"/>
+                                <field name="traccar_deviceId"/>
                             </group>
                             <group string="Associated Assets">
                                 <field name="m2m_network_id"/>
-                                <field name="vehicle_id"/>
+                                <field name="vehicle_id"  widget="many2one"/>
                                 <field name="vehicle_ids"/>
                             </group>
                         </group>

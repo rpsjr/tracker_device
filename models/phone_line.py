@@ -12,6 +12,7 @@ class PhoneLine(models.Model):
     name = fields.Char(compute="_compute_phone_line_name", store=True)
     tel_operator = fields.Selection([('claro', 'Claro'), ('oi', 'Oi'), ('tim', 'Tim'), ('vivo', 'Vivo')], 'Network Provider', help='Network Telephone Provider')
     phone_nr = fields.Char('Line Number', required=True)
+    sim_card_serial = fields.Char('Sim Card Serial', required=True , help='Sim Card Serial used in Bar Code')
     tel_operator_plan = fields.Char('Plan', default='Easy')
     tel_operator_user = fields.Char('Plan Login')
     tel_operator_pass = fields.Char('Plan Pass')
