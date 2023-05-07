@@ -45,6 +45,7 @@ class TrackerDevice(models.Model):
     def _fetch_traccar_deviceId(self):
         if not self.traccar_deviceId:
             device_status = self._traccar_api('devices', 'GET')
+            #_logger.info(f"################ _fetch_traccar_deviceId device_status {device_status}")
             self.write({'traccar_deviceId': device_status[0]["id"]})
         return self.traccar_deviceId      
 
@@ -86,11 +87,11 @@ class TrackerDevice(models.Model):
         """
         
         payload = {'type': 'engineResume', 'deviceId': self._fetch_traccar_deviceId()}
-        _logger.info(f"################ send_traccar_api_command payload {payload}")
+        #_logger.info(f"################ send_traccar_api_command payload {payload}")
         response = self._traccar_api('commands/send', 'POST', payload)
         if response:
             self.write({'engine_last_cmd': 'unblocked'})
-            _logger.info(f"################ send_traccar_api_command response {response}")
+            #_logger.info(f"################ send_traccar_api_command response {response}")
             return response
 
     def toggle_engine_status(self, only_stopped=True):
@@ -128,7 +129,7 @@ class TrackerDevice(models.Model):
         payload['uniqueId'] = self.imei
 
         url = f'{api_url}/api/{api_endpoint}'
-        _logger.info(f"################ send_traccar_api_command url {url}")
+        #_logger.info(f"################ send_traccar_api_command url {url}")
         if request_type == 'GET':
             response = requests.get(url, headers=headers, params=payload)
         elif request_type == 'POST':
@@ -188,3 +189,26 @@ class TrackerDevice(models.Model):
     def _compute_tracker_device_name(self):
         for record in self:
             record.name = (record.m2m_network_id.name or '') + '/' + (record.model or '')
+
+    @api.depends('vehicle_id', 'imei')
+    def _update_vehicle_odometer(self):
+            if self.vehicle_id and self.imei:
+                # Call the traccar_api method to get the latest position of the device
+                response = None
+                payload = {
+                    'deviceId': self._fetch_traccar_deviceId(),
+                    'limit': 1}
+                response = self._traccar_api('positions', payload=payload)
+                if response:
+                    #_logger.info(f"################ response {response}")
+                    
+                    # Extract the odometer value from the response
+                    odometer_value = int(response[0]['attributes'].get('totalDistance'))
+                    odometer_value = str(int(odometer_value / 1000))
+
+                    # Update the odometer field of the vehicle
+                    if odometer_value:
+                        if float(odometer_value) > self.vehicle_id.odometer:
+                            self.vehicle_id.odometer = float(odometer_value)
+
+                            return True

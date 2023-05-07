@@ -28,24 +28,4 @@ class FleetVehicle(models.Model):
 
         # Iterate over each vehicle and update its odometer value
         for vehicle in vehicles:
-            # Get the Tracker Device associated with the vehicle
-            tracker_device = None
-            tracker_device = vehicle.tracker_device
-            if tracker_device:
-
-                # Call the traccar_api method to get the latest position of the device
-                response = None
-                response = tracker_device._traccar_api('positions', payload={'limit': 1})
-                if response:
-                    #_logger.info(f"################ response {response}")
-                    
-                    # Extract the odometer value from the response
-                    odometer_value = int(response[0]['attributes'].get('totalDistance'))
-                    odometer_value = str(int(odometer_value / 1000))
-
-                    # Update the odometer field of the vehicle
-                    if odometer_value:
-                        if float(odometer_value) > vehicle.odometer:
-                            vehicle.odometer = float(odometer_value)
-
-        return True
+            vehicle.tracker_device._update_vehicle_odometer()
