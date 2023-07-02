@@ -1,29 +1,32 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <!-- Copyright <2021> <Raimundo Pereira da Silva Junior <raimundopsjr@gmail.com>
      License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl). -->
 <odoo>
   <data>
     <!-- form view -->
-      <record id="phone_line_form_view" model="ir.ui.view" >
+      <record id="phone_line_form_view" model="ir.ui.view">
           <field name="name">phone.line.form</field>
           <field name="model">phone.line</field>
           <field name="arch" type="xml">
               <form string="Phone Line">
                     <sheet>
-                        <field name="name" invisible="1"/>
+                        <field name="name" invisible="1" />
                         <group col="2">
                             <group string="">
                                 <field name="tel_operator" />
-                                <field name="phone_nr" widget="phone"/>
-                                <field name="sim_card_serial"/>
-                                <field name="tel_operator_user"/>
-                                <field name="tel_operator_plan"/>
-                                <field name="tel_operator_pass"/>
+                                <field name="phone_nr" widget="phone" />
+                                <field name="sim_card_serial" />
+                                <field name="tel_operator_user" />
+                                <field name="tel_operator_plan" />
+                                <field name="tel_operator_pass" />
                             </group>
                             <group string="">
-                                <field name="l10n_br_cnpj_cpf"/>
-                                <field name="holder"/>
-                                <field name="tracker_device_id" widget="many2one"/> 
+                                <field name="l10n_br_cnpj_cpf" />
+                                <field name="holder" />
+                                <field
+                  name="tracker_device_id"
+                  widget="many2one"
+                />
                             </group>
                         </group>
                     </sheet>
@@ -37,13 +40,13 @@
           <field name="arch" type="xml">
               <tree string="Units">
                 <field name="tel_operator" />
-                <field name="phone_nr" widget="phone"/>
-                <field name="tel_operator_user"/>
-                <field name="tel_operator_plan"/>
-                <field name="tel_operator_pass"/>
-                <field name="l10n_br_cnpj_cpf"/>
-                <field name="holder"/>
-                <field name="tracker_device_id"/>
+                <field name="phone_nr" widget="phone" />
+                <field name="tel_operator_user" />
+                <field name="tel_operator_plan" />
+                <field name="tel_operator_pass" />
+                <field name="l10n_br_cnpj_cpf" />
+                <field name="holder" />
+                <field name="tracker_device_id" />
               </tree>
           </field>
       </record>
@@ -52,7 +55,7 @@
           <field name="name">Phone lines</field>
           <field name="res_model">phone.line</field>
           <field name="view_mode">tree,form</field>
-          <field name="view_id" ref="phone_line_view_tree"/>
+          <field name="view_id" ref="phone_line_view_tree" />
           <field name="help" type="html">
               <p class="o_view_nocontent_smiling_face">
                   Create a phone line
@@ -63,11 +66,13 @@
       </record>
 
       <!-- MENUS -->
-      <menuitem id="phone_line_menu_main"
-          name="Phone lines"
-          parent="fleet.fleet_configuration"
-          action="phone_line_action"
-          groups="fleet.fleet_group_user"/>
+      <menuitem
+      id="phone_line_menu_main"
+      name="Phone lines"
+      parent="fleet.fleet_configuration"
+      action="phone_line_action"
+      groups="fleet.fleet_group_user"
+    />
   </data>
 
 </odoo>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <!-- Copyright <2021> <Raimundo Pereira da Silva Junior <raimundopsjr@gmail.com>
      License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl). -->
 <odoo>
@@ -12,36 +12,55 @@
               <form string="Tracker Device">
 
                     <div name="button_box" position="inside">
-                        <button class="oe_stat_button" type="object" name="toggle_engine_status" string='Resume Engine'
-                            icon="fa-play-circle" attrs="{'invisible': [('engine_last_cmd', '=', 'unblocked')]}"
-                            >
+                        <button
+              class="oe_stat_button"
+              type="object"
+              name="toggle_engine_status"
+              string='Resume Engine'
+              icon="fa-play-circle"
+              attrs="{'invisible': [('engine_last_cmd', '=', 'unblocked')]}"
+            >
 
                         </button>
-                        <button class="oe_stat_button" type="object" name="toggle_engine_status" string='Stop Engine'
-                            icon="fa-stop" attrs="{'invisible': [('engine_last_cmd', '=', 'blocked')]}"
-                            >
+                        <button
+              class="oe_stat_button"
+              type="object"
+              name="toggle_engine_status"
+              string='Stop Engine'
+              icon="fa-stop"
+              attrs="{'invisible': [('engine_last_cmd', '=', 'blocked')]}"
+            >
 
                         </button>
                     </div>
 
                     <sheet>
-                        <field name="name" invisible="1"/>
+                        <field name="name" invisible="1" />
                         <group col="2">
                             <group string="Tracker Unit">
                                 <field name="model" />
-                                <field name="imei"/>
-                                <field name="unit_pass"/>
-                                <field name="admin_lines"/>
-                                <field name="engine_last_cmd"/>
-                                <field name="traccar_deviceId"/>
+                                <field name="imei" />
+                                <field name="unit_pass" />
+                                <field name="admin_lines" />
+                                <field name="engine_last_cmd" />
+                                <field name="traccar_deviceId" />
                             </group>
                             <group string="Associated Assets">
-                                <field name="m2m_network_id"/>
-                                <field name="vehicle_id"  widget="many2one"/>
-                                <field name="vehicle_ids"/>
+                                <field name="m2m_network_id" />
+                                <field name="vehicle_id" widget="many2one" />
+                                <field name="vehicle_ids" />
                             </group>
                         </group>
                     </sheet>
+
+                    <div class="oe_chatter">
+                        <field
+              name="message_follower_ids"
+              widget="mail_followers"
+            />
+                        <field name="message_ids" widget="mail_thread" />
+                    </div>
+
                 </form>
           </field>
       </record>
@@ -52,12 +71,12 @@
           <field name="arch" type="xml">
               <tree string="Units">
                 <field name="model" />
-                <field name="imei"/>
-                <field name="unit_pass"/>
-                <field name="admin_lines"/>
-                <field name="m2m_network_id"/>
-                <field name="vehicle_id"/>
-                <field name="vehicle_ids"/>
+                <field name="imei" />
+                <field name="unit_pass" />
+                <field name="admin_lines" />
+                <field name="m2m_network_id" />
+                <field name="vehicle_id" />
+                <field name="vehicle_ids" />
               </tree>
           </field>
       </record>
@@ -66,7 +85,7 @@
           <field name="name">GPS trackers</field>
           <field name="res_model">tracker.device</field>
           <field name="view_mode">tree,form</field>
-          <field name="view_id" ref="tracker_device_view_tree"/>
+          <field name="view_id" ref="tracker_device_view_tree" />
           <field name="help" type="html">
               <p class="o_view_nocontent_smiling_face">
                   Create a GPS tracker
@@ -77,10 +96,12 @@
       </record>
 
       <!-- MENUS -->
-      <menuitem id="tracker_device_menu_main"
-          name="GPS Tracker"
-          parent="fleet.fleet_configuration"
-          action="tracker_device_action"
-          groups="fleet.fleet_group_user"/>
+      <menuitem
+      id="tracker_device_menu_main"
+      name="GPS Tracker"
+      parent="fleet.fleet_configuration"
+      action="tracker_device_action"
+      groups="fleet.fleet_group_user"
+    />
   </data>
 </odoo>
