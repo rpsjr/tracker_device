@@ -112,6 +112,7 @@ class TrackerDevice(models.Model):
                 response = self._traccar_api("commands/send", "POST", payload)
                 if response:
                     self.write({"engine_last_cmd": "blocked"})
+                    self.env.cr.commit()
                     return response
             else:
                 _logger.warning(
