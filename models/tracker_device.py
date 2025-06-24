@@ -6,6 +6,7 @@ import logging
 from datetime import datetime, timedelta, timezone
 
 import requests
+from requests.exceptions import HTTPError
 
 from odoo import _, api, fields, models
 
@@ -68,12 +69,23 @@ class TrackerDevice(models.Model):
             self.write({"traccar_deviceId": device_status[0]["id"]})
         return self.traccar_deviceId
 
-    def stop_engine(self, only_stopped=True):
+    def queue_notification(self):
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Alerta!'),
+                'message': 'Command accepted but not yet processed. Cod. 202',
+                'type': 'info',  # Can be 'success', 'warning', 'danger', 'info'
+                'sticky': False,  # True means it will stay until closed manually
+            }
+        }
+
+    def stop_engine(self, safe_not_moving_vehicle=True):
         """
         The stop_engine method is responsible for
         sending the command to stop the
-        engine of a device. However, the method has
-        been modified to only send the
+        engine of a device. The method only send the
         engine stop command if the device's fixTime
         attribute is older than 30 minutes
         or the device's speed is less than one.
@@ -84,65 +96,69 @@ class TrackerDevice(models.Model):
         where it is necessary to prevent
         the engine of a device from stopping when
         the device is in motion or has been
-        recently active. By checking the fixTime
-        attribute and speed of the device,
-        the method ensures that the engine stop
-        command is only sent when it is safe
-        to do so. The engine_last_cmd field
+        recently active. The engine_last_cmd field
         provides a record of the last command
-        sent to the device, which can be useful
-        for tracking and monitoring purposes.
+        sent to the device.
         """
-        if only_stopped:
-            device_positions = self._traccar_api("positions", "GET")
-            fix_time_str = device_positions[0]["fixTime"]
-            fix_time = datetime.strptime(fix_time_str, "%Y-%m-%dT%H:%M:%S.%f%z")
-            now = datetime.now(timezone.utc)
-            # check if device fixTime is older than
-            # 30 min or if device speed is less than one
-            if (
-                now - fix_time > timedelta(minutes=30)
-                or device_positions[0]["speed"] < 1
+        
+        device_positions = self._traccar_api("positions", "GET")
+        fix_time_str = device_positions[0]["fixTime"]
+        fix_time = datetime.strptime(fix_time_str, "%Y-%m-%dT%H:%M:%S.%f%z")
+        now = datetime.now(timezone.utc)
+        # check if device fixTime is older than
+        # 30 min or if device speed is less than one
+        if not (
+            now - fix_time > timedelta(minutes=30)
+            or device_positions[0]["speed"] < 1
             ):
-                # update engine_last_cmd field to blocked
-                payload = {
-                    "type": "engineStop",
-                    "deviceId": self._fetch_traccar_device_id(),
-                }
-                response = self._traccar_api("commands/send", "POST", payload)
-                if response:
-                    self.write({"engine_last_cmd": "blocked"})
-                    self.env.cr.commit()
-                    return response
-            else:
-                _logger.warning(
-                    "Device fixTime is less than 30 minutes old or \
-                        Device speed is greater than or equal to 1"
-                )
+                safe_not_moving_vehicle = False
 
-    def resume_engine(self, only_stopped=True):
+        if safe_not_moving_vehicle:
+            # update engine_last_cmd field to blocked
+            payload = {
+                "type": "engineStop",
+                "deviceId": self._fetch_traccar_device_id(),
+            }
+            response = self._traccar_api("commands/send", "POST", payload)
+            if response:
+                if response.status_code == 202:
+                    self.queue_notification()
+                    _logger.warning(_(f"TrackerDevice {TrackerDevice}: Command accepted but not yet processed."))
+                self.write({"engine_last_cmd": "blocked"})
+                return response
+        else:
+            _logger.warning(
+                f"Device {self.id} is not safe to stop, fixTime is \
+                less than 30 minutes old or speed is greater than  \
+                or equal to 1km/h"
+            )
+
+    def resume_engine(self, safe_not_moving_vehicle=True):
         """ "
         The resume_engine method is responsible for sending
         the command to resume the engine of a device.
         """
-        if only_stopped:
+        if safe_not_moving_vehicle:
             payload = {
                 "type": "engineResume",
                 "deviceId": self._fetch_traccar_device_id(),
             }
             response = self._traccar_api("commands/send", "POST", payload)
             if response:
+                if response.status_code == 202:
+                    self.queue_notification()
+                    _logger.warning(_(f"TrackerDevice {TrackerDevice}: Command accepted but not yet processed."))
                 self.write({"engine_last_cmd": "unblocked"})
                 return response
 
-    def toggle_engine_status(self, only_stopped=True):
+    def toggle_engine_status(self, safe_not_moving_vehicle=True):
         """This method is responsible for toggling
         the engine status of a device between blocked
         and unblocked"""
         if self.engine_last_cmd == "unblocked":
-            self.stop_engine(only_stopped)
+            self.stop_engine(safe_not_moving_vehicle)
         else:
-            self.resume_engine(only_stopped)
+            self.resume_engine(safe_not_moving_vehicle)
 
     def _traccar_api(self, api_endpoint, request_type="GET", payload=None):
         """
@@ -182,12 +198,28 @@ class TrackerDevice(models.Model):
         elif request_type == "DELETE":
             response = requests.delete(url, headers=headers, timeout=5000)
         else:
-            raise ValueError("Invalid request type.")
+            _logger.warning(f'Invalid request type: {request_type}')
+            raise ValueError(f'Invalid request type: {request_type}')
 
-        if response.status_code == 200:
-            return response.json()
+        try:
+            # If the response was successful, no Exception will be raised
+            response.raise_for_status()
+
+        except HTTPError as http_err:
+            _logger.warning(f'HTTP error occurred: {http_err}')  # Python 3.6+
+            _logger.warning(f'payload: {payload}')
+            # The 'http_err' object contains the response, so you can inspect it
+            _logger.warning(f'Status Code: {http_err.response.status_code}')
+            return False
+
+        except Exception as err:
+            _logger.warning(f'Other error occurred: {err}')
+            _logger.warning(f'payload: {payload}')
+            return False
+
         else:
-            raise ValueError(f"Request failed with status code {response.status_code}.")
+            # This block runs only if the 'try' block was successful (no exceptions)
+            return response
 
     @api.depends("vehicle_ids")
     def _compute_vehicle_id(self):
