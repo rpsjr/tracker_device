@@ -70,7 +70,7 @@ class TrackerDevice(models.Model):
         return self.traccar_deviceId
 
     def queue_notification(self):     
-        return self.env['bus.bus'].sendone((model._cr.dbname, 'res.partner', env.user.partner_id.id),
+        return self.env['bus.bus'].sendone((self.env.cr.dbname, 'res.partner', self.env.user.partner_id.id),
                     {
                     'type': 'simple_notification', 
                     'title': 'Command queued!', 
