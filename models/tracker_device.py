@@ -69,14 +69,17 @@ class TrackerDevice(models.Model):
             self.write({"traccar_deviceId": device_status[0]["id"]})
         return self.traccar_deviceId
 
-    def queue_notification(self):
-        return self.env.user.notify_info(
-                        message='Command accepted but not yet processed. Cod. 202',
-                        title=_('Alerta!'),
-                        sticky=False,
-                        display_type='info',
-                        message_type='info',
-                    )
+    def queue_notification(self):     
+        return self.env['bus.bus'].sendone((model._cr.dbname, 'res.partner', env.user.partner_id.id),
+                    {
+                    'type': 'simple_notification', 
+                    'title': 'Command queued!', 
+                    'message': 'Command accepted but not yet processed. Cod. 202', 
+                    'sticky':False, 
+                    'warning': False
+                    })
+        
+        
 
     def stop_engine(self, safe_not_moving_vehicle=True):
         """
