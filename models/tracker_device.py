@@ -65,7 +65,7 @@ class TrackerDevice(models.Model):
 
     def _fetch_traccar_device_id(self):
         if not self.traccar_deviceId:
-            device_status = self._traccar_api("devices", "GET")
+            device_status = self._traccar_api("devices", "GET").json()
             self.write({"traccar_deviceId": device_status[0]["id"]})
         return self.traccar_deviceId
 
@@ -101,7 +101,7 @@ class TrackerDevice(models.Model):
         sent to the device.
         """
         
-        device_positions = self._traccar_api("positions", "GET")
+        device_positions = self._traccar_api("positions", "GET").json()
         fix_time_str = device_positions[0]["fixTime"]
         fix_time = datetime.strptime(fix_time_str, "%Y-%m-%dT%H:%M:%S.%f%z")
         now = datetime.now(timezone.utc)
@@ -125,7 +125,7 @@ class TrackerDevice(models.Model):
                     self.queue_notification()
                     _logger.warning(_(f"TrackerDevice {TrackerDevice}: Command accepted but not yet processed."))
                 self.write({"engine_last_cmd": "blocked"})
-                return response
+                return response.json()
         else:
             _logger.warning(
                 f"Device {self.id} is not safe to stop, fixTime is \
@@ -149,7 +149,7 @@ class TrackerDevice(models.Model):
                     self.queue_notification()
                     _logger.warning(_(f"TrackerDevice {TrackerDevice}: Command accepted but not yet processed."))
                 self.write({"engine_last_cmd": "unblocked"})
-                return response
+                return response.json()
 
     def toggle_engine_status(self, safe_not_moving_vehicle=True):
         """This method is responsible for toggling
@@ -262,7 +262,7 @@ class TrackerDevice(models.Model):
             if response:
 
                 # Extract the odometer value from the response
-                odometer_value = response[0]["attributes"].get("totalDistance")
+                odometer_value = response.json()[0]["attributes"].get("totalDistance")
                 odometer_value = int(odometer_value)
                 odometer_value = str(int(odometer_value / 1000))
 
