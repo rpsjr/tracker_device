@@ -70,46 +70,37 @@ class TrackerDevice(models.Model):
         return self.traccar_deviceId
 
     def queue_notification(self):
-        return {
-            'type': 'ir.actions.client',
-            'tag': 'display_notification',
-            'params': {
-                'title': _('Alerta!'),
-                'message': 'Command accepted but not yet processed. Cod. 202',
-                'type': 'info',  # Can be 'success', 'warning', 'danger', 'info'
-                'sticky': False,  # True means it will stay until closed manually
-            }
-        }
+        return self.env.user.notify_info(
+                        message='Command accepted but not yet processed. Cod. 202',
+                        title=_('Alerta!'),
+                        sticky=False,
+                        display_type='info',
+                        message_type='info',
+                    )
 
     def stop_engine(self, safe_not_moving_vehicle=True):
         """
-        The stop_engine method is responsible for
-        sending the command to stop the
-        engine of a device. The method only send the
-        engine stop command if the device's fixTime
-        attribute is older than 30 minutes
-        or the device's speed is less than one.
-        Additionally, when the block command
-        is sent, the engine_last_cmd field is
-        updated to reflect that the command is
-        blocked. This method is useful in scenarios
-        where it is necessary to prevent
-        the engine of a device from stopping when
-        the device is in motion or has been
-        recently active. The engine_last_cmd field
-        provides a record of the last command
-        sent to the device.
+        Sends a command to stop the device's engine after a safety check.
+
+        The command is only sent if the vehicle is considered safe to stop. The
+        safety conditions are:
+        1. The last position update (`fixTime`) is older than a set threshold
+        (e.g., 30 minutes), indicating the vehicle has been inactive.
+        2. The vehicle's 'motion' attribute is False.
+
+        If the safety conditions are met, the stop command is sent to the Traccar
+        API, and the device's `engine_last_cmd` field is updated to 'blocked'.
         """
         
         device_positions = self._traccar_api("positions", "GET").json()
         fix_time_str = device_positions[0]["fixTime"]
         fix_time = datetime.strptime(fix_time_str, "%Y-%m-%dT%H:%M:%S.%f%z")
         now = datetime.now(timezone.utc)
-        # check if device fixTime is older than
-        # 30 min or if device speed is less than one
+        motion = device_positions[0]["attributes"]["motion"]
+        # check if device is moving
         if not (
-            now - fix_time > timedelta(minutes=30)
-            or device_positions[0]["speed"] < 1
+            now - fix_time > timedelta(minutes=10)
+            or motion
             ):
                 safe_not_moving_vehicle = False
 
@@ -123,14 +114,12 @@ class TrackerDevice(models.Model):
             if response:
                 if response.status_code == 202:
                     self.queue_notification()
-                    _logger.warning(_(f"TrackerDevice {TrackerDevice}: Command accepted but not yet processed."))
+                    _logger.warning(_(f"TrackerDevice ID {self.id}: Command accepted but not yet processed."))
                 self.write({"engine_last_cmd": "blocked"})
                 return response.json()
         else:
             _logger.warning(
-                f"Device {self.id} is not safe to stop, fixTime is \
-                less than 30 minutes old or speed is greater than  \
-                or equal to 1km/h"
+                f"TrackerDevice {self.id} is not safe to stop, fixTime is less than 30 minutes old or speed is greater than or equal to 1km/h"
             )
 
     def resume_engine(self, safe_not_moving_vehicle=True):
@@ -147,7 +136,7 @@ class TrackerDevice(models.Model):
             if response:
                 if response.status_code == 202:
                     self.queue_notification()
-                    _logger.warning(_(f"TrackerDevice {TrackerDevice}: Command accepted but not yet processed."))
+                    _logger.warning(_(f"TrackerDevice ID {self.id}: Command accepted but not yet processed."))
                 self.write({"engine_last_cmd": "unblocked"})
                 return response.json()
 
