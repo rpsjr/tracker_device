@@ -70,14 +70,20 @@ class TrackerDevice(models.Model):
         return self.traccar_deviceId
 
     def queue_notification(self):     
-        return self.env['bus.bus'].sendone((self.env.cr.dbname, 'res.partner', self.env.user.partner_id.id),
+        return self.env['bus.bus'].sendone(
+            (
+                self.env.cr.dbname, 
+                'res.partner', 
+                self.env.user.partner_id.id
+            ),
                     {
-                    'type': 'simple_notification', 
-                    'title': 'Command queued!', 
-                    'message': 'Command accepted but not yet processed. Cod. 202', 
-                    'sticky':False, 
-                    'warning': False
-                    })
+                        'type': 'simple_notification', 
+                        'title': 'Command queued!', 
+                        'message': 'Command accepted but not yet processed. Cod. 202', 
+                        'sticky':False, 
+                        'warning': False
+                    }
+                    )
         
         
 
@@ -177,7 +183,8 @@ class TrackerDevice(models.Model):
 
         if not payload:
             payload = {}
-        payload["uniqueId"] = self.imei
+        if "deviceId" not in payload:
+            payload["uniqueId"] = self.imei
 
         url = f"{api_url}/api/{api_endpoint}"
         # _logger.info(f"################ send_traccar_api_command url {url}")
@@ -246,21 +253,29 @@ class TrackerDevice(models.Model):
     @api.depends("vehicle_id", "imei")
     def _update_vehicle_odometer(self):
         if self.vehicle_id and self.imei:
-            # Call the traccar_api method to get
-            #  the latest position of the device
-            response = None
+            # Call the traccar_api method to get the latest position of the device
             payload = {"deviceId": self._fetch_traccar_device_id(), "limit": 1}
-            response = self._traccar_api("positions", payload=payload)
+            response = self._traccar_api("positions", "GET", payload=payload)
+
             if response:
+                positions = response.json()
+                if not positions:
+                    _logger.warning(
+                        "No position data received for device ID %s",
+                        self._fetch_traccar_device_id(),
+                    )
+                    return False
 
-                # Extract the odometer value from the response
-                odometer_value = response.json()[0]["attributes"].get("totalDistance")
-                odometer_value = int(odometer_value)
-                odometer_value = str(int(odometer_value / 1000))
+                # Safely get the 'totalDistance' attribute
+                attributes = positions[0].get("attributes", {})
+                odometer_value = attributes.get("totalDistance")
 
-                # Update the odometer field of the vehicle
-                if odometer_value:
-                    if float(odometer_value) > self.vehicle_id.odometer:
-                        self.vehicle_id.odometer = float(odometer_value)
+                if odometer_value is not None:
+                    # The value from Traccar is in meters, convert it to kilometers
+                    odometer_in_km = int(odometer_value) / 1000
 
+                    # Update the odometer field of the vehicle if the new value is greater
+                    if odometer_in_km > self.vehicle_id.odometer:
+                        self.vehicle_id.odometer = odometer_in_km
                         return True
+        return False
