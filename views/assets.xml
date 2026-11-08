@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <template
+        id="assets_backend"
+        name="tracker_device assets"
+        inherit_id="web.assets_backend"
+    >
+        <xpath expr="." position="inside">
+            <script
+                type="text/javascript"
+                src="/tracker_device/static/src/js/inspection_traccar_odometer.js"
+            />
+        </xpath>
+    </template>
+</odoo>
+

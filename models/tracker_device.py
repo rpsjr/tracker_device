@@ -65,8 +65,11 @@ class TrackerDevice(models.Model):
 
     def _fetch_traccar_device_id(self):
         if not self.traccar_deviceId:
-            device_status = self._traccar_api("devices", "GET").json()
-            self.write({"traccar_deviceId": device_status[0]["id"]})
+            resp = self._traccar_api("devices", "GET")
+            if resp:
+                device_status = resp.json()
+                if device_status:
+                    self.write({"traccar_deviceId": device_status[0]["id"]})
         return self.traccar_deviceId
 
     def queue_notification(self):     
@@ -250,32 +253,75 @@ class TrackerDevice(models.Model):
                 (record.m2m_network_id.name or "") + "/" + (record.model or "")
             )
 
+    def get_traccar_odometer_km(self):
+        """Obtém o odômetro atual (totalDistance) do dispositivo no Traccar em km."""
+        self.ensure_one()
+        if not self.imei:
+            return None
+        device_id = self._fetch_traccar_device_id()
+        if not device_id:
+            return None
+        payload = {"deviceId": device_id, "limit": 1}
+        response = self._traccar_api("positions", "GET", payload=payload)
+        if not response:
+            return None
+        try:
+            positions = response.json()
+        except Exception as err:
+            _logger.warning(
+                "Erro ao decodificar resposta de posição do Traccar para device %s: %s",
+                device_id,
+                err,
+            )
+            return None
+        if not positions:
+            _logger.warning(
+                "No position data received for device ID %s",
+                device_id,
+            )
+            return None
+        attributes = positions[0].get("attributes") or {}
+        odometer_value = attributes.get("totalDistance")
+        if odometer_value is not None:
+            return int(float(odometer_value)) / 1000
+        return None
+
+    def set_traccar_odometer_km(self, odometer_km):
+        """Atualiza o acumulador de odômetro (totalDistance, em metros) do dispositivo no Traccar."""
+        self.ensure_one()
+        if not self.imei:
+            return False
+        device_id = self._fetch_traccar_device_id()
+        if not device_id:
+            return False
+        total_distance_meters = float(odometer_km) * 1000.0
+        payload = {
+            "deviceId": int(device_id),
+            "totalDistance": total_distance_meters,
+        }
+        response = self._traccar_api(
+            f"devices/{int(device_id)}/accumulators",
+            "PUT",
+            payload=payload,
+        )
+        if response is not False and getattr(response, "ok", False):
+            _logger.info(
+                "Odômetro do dispositivo Traccar %s (IMEI %s) atualizado para %.2f km (%.0f m).",
+                device_id,
+                self.imei,
+                float(odometer_km),
+                total_distance_meters,
+            )
+            return True
+        return False
+
     @api.depends("vehicle_id", "imei")
     def _update_vehicle_odometer(self):
         if self.vehicle_id and self.imei:
-            # Call the traccar_api method to get the latest position of the device
-            payload = {"deviceId": self._fetch_traccar_device_id(), "limit": 1}
-            response = self._traccar_api("positions", "GET", payload=payload)
-
-            if response:
-                positions = response.json()
-                if not positions:
-                    _logger.warning(
-                        "No position data received for device ID %s",
-                        self._fetch_traccar_device_id(),
-                    )
-                    return False
-
-                # Safely get the 'totalDistance' attribute
-                attributes = positions[0].get("attributes", {})
-                odometer_value = attributes.get("totalDistance")
-
-                if odometer_value is not None:
-                    # The value from Traccar is in meters, convert it to kilometers
-                    odometer_in_km = int(odometer_value) / 1000
-
-                    # Update the odometer field of the vehicle if the new value is greater
-                    if odometer_in_km > self.vehicle_id.odometer:
-                        self.vehicle_id.odometer = odometer_in_km
-                        return True
+            odometer_in_km = self.get_traccar_odometer_km()
+            if odometer_in_km is not None:
+                # Update the odometer field of the vehicle if the new value is greater
+                if odometer_in_km > self.vehicle_id.odometer:
+                    self.vehicle_id.odometer = odometer_in_km
+                    return True
         return False

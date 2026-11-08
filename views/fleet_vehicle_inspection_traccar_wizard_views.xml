@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record
+        id="fleet_vehicle_inspection_traccar_wizard_view_form"
+        model="ir.ui.view"
+    >
+        <field name="name">fleet.vehicle.inspection.traccar.wizard.form</field>
+        <field name="model">fleet.vehicle.inspection.traccar.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Atualizar Odômetro no Traccar?">
+                <field name="confirm_inspection" invisible="1" />
+                <div class="alert alert-warning" role="alert">
+                    <i class="fa fa-exclamation-triangle mr-2" title="Aviso" />
+                    <strong>
+                        O valor de odômetro registrado nesta inspeção é maior que o odômetro atual no Traccar.
+                    </strong>
+                    <p class="mb-0 mt-1">
+                        Deseja replicar e atualizar este valor de odômetro no Traccar?
+                    </p>
+                </div>
+                <group>
+                    <group>
+                        <field name="inspection_id" />
+                        <field name="vehicle_id" />
+                        <field name="tracker_device_id" />
+                    </group>
+                    <group>
+                        <field name="traccar_odometer" />
+                        <field name="inspection_odometer" />
+                    </group>
+                </group>
+                <footer>
+                    <button
+                        name="action_apply_traccar_odometer"
+                        string="Sim, replicar no Traccar"
+                        type="object"
+                        class="btn-primary"
+                        attrs="{'invisible': [('confirm_inspection', '=', True)]}"
+                    />
+                    <button
+                        name="action_apply_traccar_odometer"
+                        string="Sim, replicar no Traccar e Confirmar"
+                        type="object"
+                        class="btn-primary"
+                        attrs="{'invisible': [('confirm_inspection', '=', False)]}"
+                    />
+                    <button
+                        name="action_skip_traccar_odometer"
+                        string="Não atualizar no Traccar"
+                        type="object"
+                        class="btn-secondary"
+                        attrs="{'invisible': [('confirm_inspection', '=', True)]}"
+                    />
+                    <button
+                        name="action_skip_traccar_odometer"
+                        string="Não, apenas Confirmar Inspeção"
+                        type="object"
+                        class="btn-secondary"
+                        attrs="{'invisible': [('confirm_inspection', '=', False)]}"
+                    />
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>
+

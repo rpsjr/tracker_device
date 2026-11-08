@@ -2,4 +2,5 @@
 
 from . import tracker_device
 from . import fleet_vehicle
+from . import fleet_vehicle_inspection
 from . import phone_line

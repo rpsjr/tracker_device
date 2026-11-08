@@ -35,4 +35,28 @@ class FleetVehicle(models.Model):
 
         # Iterate over each vehicle and update its odometer value
         for vehicle in vehicles:
-            vehicle.tracker_device._update_vehicle_odometer()
+            if vehicle.tracker_device:
+                vehicle.tracker_device._update_vehicle_odometer()
+
+    def get_traccar_odometer_km(self):
+        """Retorna o valor atual do odômetro do veículo no Traccar (em km) ou None."""
+        self.ensure_one()
+        if not self.tracker_device:
+            return None
+        return self.tracker_device.get_traccar_odometer_km()
+
+    def get_max_odometer_odoo_traccar(self):
+        """Retorna o maior valor entre o último odômetro do veículo no Odoo e no Traccar."""
+        self.ensure_one()
+        odoo_odometer = float(self.odometer or 0.0)
+        traccar_odometer = self.get_traccar_odometer_km()
+        if traccar_odometer is not None:
+            return max(odoo_odometer, float(traccar_odometer))
+        return odoo_odometer
+
+    def set_traccar_odometer_km(self, odometer_km):
+        """Atualiza o odômetro do veículo no Traccar."""
+        self.ensure_one()
+        if not self.tracker_device:
+            return False
+        return self.tracker_device.set_traccar_odometer_km(odometer_km)
